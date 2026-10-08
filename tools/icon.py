@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: MIT
-"""Draws Glowbar Disco's launcher icon: the four-colour Glowbar, lit, on black.
+"""Draws Glowbar Disco's launcher icon: the Glowbar's four segments, lit, on black.
 
 One geometry, two outputs: the adaptive icon's vector drawables (res/drawable/ic_launcher_*.xml) and an SVG of the
 whole icon for previews. Run it after changing anything here (`./dc icon` also redraws the README's picture):
@@ -13,8 +13,16 @@ from pathlib import Path
 
 RES = Path(__file__).resolve().parent.parent / "app/src/main/res/drawable"
 
-BLUE, RED, YELLOW, GREEN = "#4285F4", "#EA4335", "#FBBC04", "#34A853"
+# The bar's four segments, left to right, and the colour of the light around each. One colour family on purpose: four
+# segments in Google's blue, red, yellow and green would read as Google's mark (Play's Impersonation policy).
+PALETTES = {
+    "white": (["#FFFFFF", "#FFFFFF", "#FFFFFF", "#FFFFFF"], ["#DCE6FF", "#DCE6FF", "#DCE6FF", "#DCE6FF"]),
+    "magenta": (["#FF5CD6", "#FF5CD6", "#FF5CD6", "#FF5CD6"], ["#FF3DCB", "#FF3DCB", "#FF3DCB", "#FF3DCB"]),
+    "neon": (["#FF5C8A", "#FF4FD8", "#C45CFF", "#8A5CFF"], ["#FF5C8A", "#FF4FD8", "#C45CFF", "#8A5CFF"]),
+}
+PALETTE = "white"
 X0, X1 = 31.0, 77.0                   # the bar, centred, well inside the 66 dp safe circle
+GAP = 1.2                             # the dark seams between the four segments
 Y0, Y1 = 50.5, 57.5
 GLOW = 26.0                           # how far each segment's light reaches sideways
 FLAT = 0.6                            # and how much flatter it is than it is wide
@@ -25,9 +33,11 @@ def f(v):
 
 
 def segments():
-    """The bar's four segments as (left, right, colour), blue to green as on the lid."""
+    """The bar's four segments as (left, right, colour, glow), with a seam between neighbours."""
     w = (X1 - X0) / 4
-    return [(X0 + i * w, X0 + (i + 1) * w, col) for i, col in enumerate((BLUE, RED, YELLOW, GREEN))]
+    bars, glows = PALETTES[PALETTE]
+    return [(X0 + i * w + (GAP / 2 if i else 0), X0 + (i + 1) * w - (GAP / 2 if i < 3 else 0), bars[i], glows[i])
+            for i in range(4)]
 
 
 def rect(x0, y0, x1, y1, left=False, right=False):
@@ -51,21 +61,24 @@ def foreground():
     segs = segments()
     shapes = []
     # Each segment's light, an ellipse of its colour around it.
-    for x0, x1, col in segs:
+    for x0, x1, _, col in segs:
         cx = (x0 + x1) / 2
         shapes.append(dict(d=circle(cx, cy, GLOW), squash=(cy, FLAT), radial=(cx, cy, GLOW,
                            [(0, col, 0.9), (0.18, col, 0.55), (0.45, col, 0.16), (0.75, col, 0.04), (1, col, 0)])))
+    # The seams stay dark, the light around the bar does not reach into them.
+    shapes += [dict(d=rect(segs[i][1], Y0, segs[i + 1][0], Y1), fill="#08080A") for i in range(3)]
     # The bar.
-    shapes += [dict(d=rect(x0, Y0, x1, Y1, left=i == 0, right=i == 3), fill=col) for i, (x0, x1, col) in enumerate(segs)]
+    shapes += [dict(d=rect(x0, Y0, x1, Y1, left=i == 0, right=i == 3), fill=col) for i, (x0, x1, col, _) in enumerate(segs)]
     # A sheen along its top edge, as on a lit glass bar.
-    shapes.append(dict(d=rect(X0, Y0, X1, Y1, left=True, right=True),
-                       linear=(0, Y0, 0, Y1, [(0, "#FFFFFF", 0.45), (0.35, "#FFFFFF", 0.0), (1, "#000000", 0.12)])))
+    shapes += [dict(d=rect(x0, Y0, x1, Y1, left=i == 0, right=i == 3),
+                    linear=(0, Y0, 0, Y1, [(0, "#FFFFFF", 0.45), (0.35, "#FFFFFF", 0.0), (1, "#000000", 0.12)]))
+               for i, (x0, x1, _, _) in enumerate(segs)]
     return shapes
 
 
 def monochrome():
     """The themed icon: the bar alone, in one colour (the launcher tints it)."""
-    return [dict(d=rect(X0, Y0, X1, Y1, left=True, right=True), fill="#FFFFFF")]
+    return [dict(d=rect(x0, Y0, x1, Y1, left=i == 0, right=i == 3), fill="#FFFFFF") for i, (x0, x1, _, _) in enumerate(segments())]
 
 
 BACKGROUND = [dict(d="M0,0h108v108h-108z", linear=(54, 0, 54, 108, [(0, "#0C0C0F", 1), (1, "#000000", 1)]))]
@@ -137,7 +150,7 @@ def svg(layers):
 def main(argv):
     (RES / "ic_launcher_background.xml").write_text(vector(BACKGROUND, "Black, a touch lighter at the top."))
     (RES / "ic_launcher_foreground.xml").write_text(
-        vector(foreground(), "The Glowbar, lit: four segments, each with its light around it."))
+        vector(foreground(), "The Glowbar, lit: four segments, each with its light around it (PALETTE in tools/icon.py)."))
     (RES / "ic_launcher_monochrome.xml").write_text(
         vector(monochrome(), "Themed icon: the bar in one colour (the launcher tints it)."))
     if "--svg" in argv:
