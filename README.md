@@ -51,7 +51,7 @@ It is made for Googlebooks (Googlebook OS, Android 17); other devices don't have
 ## Privacy
 
 It asks for no permissions, has no internet access and keeps no data. All it does is ask Android to open
-`glowbar://disco`.
+`glowbar://disco`. Right-click the icon for its [privacy policy](https://googlebook.studio/privacy/glowbar-disco).
 
 ## About this project
 

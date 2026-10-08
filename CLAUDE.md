@@ -12,6 +12,9 @@ signing keys are backed up (say "backed up privately").
 - `app/src/main/java/io/github/kuscher/disco/DiscoActivity.kt`: the whole app. `Theme.NoDisplay`, so it never draws;
   it starts `ACTION_VIEW glowbar://disco` with `FLAG_ACTIVITY_NEW_TASK` (Glowbar's own task, so a second click
   brings the same window back), shows a toast if nothing answers, and finishes.
+- `res/xml/shortcuts.xml`: the icon's right-click item "Privacy policy" (Google Play wants the policy reachable from
+  the app). It starts `DiscoActivity` with the action `io.github.kuscher.disco.action.PRIVACY`, which opens
+  googlebook.studio/privacy/glowbar-disco in the browser instead of Glowbar Disco.
 - `AndroidManifest.xml`: `excludeFromRecents`, `noHistory` and an empty `taskAffinity`, so no task of ours is left
   in Recents or on the taskbar. `android.hardware.type.pc` required, for Google Play's device filter.
 - The icon: `tools/icon.py` draws it (the four-colour Glowbar, lit, on black) and writes `res/drawable/ic_launcher_{background,foreground,

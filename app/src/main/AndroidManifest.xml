@@ -10,7 +10,7 @@
         android:label="@string/app_name">
 
         <!-- The icon. It opens Glowbar Disco in Glowbar's own window and leaves nothing behind: no window, no task in
-             Recents or on the taskbar. -->
+             Recents or on the taskbar. Its right-click menu adds the privacy policy (xml/shortcuts.xml). -->
         <activity
             android:name=".DiscoActivity"
             android:excludeFromRecents="true"
@@ -22,6 +22,7 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts" />
         </activity>
     </application>
 </manifest>

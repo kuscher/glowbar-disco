@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The icon's right-click menu: the privacy policy (Google Play asks for it to be reachable from the app). -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_privacy"
+        android:shortcutId="privacy"
+        android:shortcutLongLabel="@string/privacy_policy"
+        android:shortcutShortLabel="@string/privacy_policy">
+        <intent
+            android:action="io.github.kuscher.disco.action.PRIVACY"
+            android:targetClass="io.github.kuscher.disco.DiscoActivity"
+            android:targetPackage="io.github.kuscher.disco" />
+    </shortcut>
+</shortcuts>
