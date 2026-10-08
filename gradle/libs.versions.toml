@@ -1,0 +1,6 @@
+# Disco has no libraries: the framework's Activity, Intent and Toast are all it uses.
+[versions]
+agp = "9.4.1"
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }

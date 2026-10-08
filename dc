@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
+# Disco dev helper: build, install and try the app on a Googlebook over adb.
+#
+#   ./dc build [release]   assemble the debug (or release) APK
+#   ./dc install [APK]     install it (default: the debug APK)
+#   ./dc app               build, install, then tap the icon (launch)
+#   ./dc launch            what tapping the icon does: open Glowbar Disco
+#   ./dc idle              seconds since someone last used the device, and the focused window
+#   ./dc state             Disco's and Glowbar's tasks, and what is focused
+#   ./dc logs [N]          Disco's and Glowbar's last log lines
+#   ./dc icon              redraw the icon: its drawables, and docs/images/icon.png (needs Chrome)
+#
+# The device: ANDROID_SERIAL when set; otherwise the one attached device that says it is a PC (a Googlebook).
+set -euo pipefail
+cd "$(dirname "$0")"
+PKG=io.github.kuscher.disco
+APK=app/build/outputs/apk/debug/app-debug.apk
+[ -d "${JAVA_HOME:-}" ] || export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+export ANDROID_HOME=${ANDROID_HOME:-$HOME/Library/Android/sdk}
+command -v adb >/dev/null || PATH="$ANDROID_HOME/platform-tools:$PATH"
+
+device() {
+  if [ -n "${ANDROID_SERIAL:-}" ]; then echo "$ANDROID_SERIAL"; return; fi
+  local s found=()
+  for s in $(adb devices | awk 'NR > 1 && $2 == "device" { print $1 }'); do
+    [ "$(adb -s "$s" shell pm has-feature android.hardware.type.pc 2>/dev/null | tr -d '\r')" = true ] && found+=("$s")
+  done
+  case ${#found[@]} in
+    1) echo "${found[0]}" ;;
+    0) echo "no Googlebook attached (adb devices)" >&2; exit 1 ;;
+    *) echo "more than one Googlebook: set ANDROID_SERIAL to one of ${found[*]} (adb devices -l names the models)" >&2; exit 1 ;;
+  esac
+}
+A() { adb -s "$(device)" "$@"; }
+
+build() { if [ "${1:-}" = release ]; then ./gradlew :app:assembleRelease --console=plain -q; else ./gradlew :app:assembleDebug --console=plain -q; fi; }
+launch() { A shell am start --user current -n "$PKG/.DiscoActivity" >/dev/null; }
+idle() {
+  A shell dumpsys power | sed -n 's/.*lastUserActivityTime=[0-9]* (\([0-9]*\) ms ago).*/\1/p' | sort -n | head -1 |
+    awk '{ printf "idle %d s\n", $1 / 1000 }'
+  A shell dumpsys window | grep -m1 mCurrentFocus | sed 's/^ *//'
+}
+icon() { # the drawables from tools/icon.py; the README's picture is the same SVG, masked round, drawn by Chrome
+  local tmp chrome="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+  tmp=$(mktemp -d); tools/icon.py --svg "$tmp/icon.svg"
+  printf '%s' '<!doctype html><body style="margin:0"><div style="width:448px;height:448px;overflow:hidden;border-radius:50%">' \
+    '<img src="icon.svg" style="width:672px;height:672px;margin:-112px"></div>' > "$tmp/icon.html"
+  mkdir -p docs/images
+  "$chrome" --headless=new --disable-gpu --hide-scrollbars --default-background-color=00000000 --window-size=448,448 \
+    --screenshot="$PWD/docs/images/icon.png" "file://$tmp/icon.html" 2>/dev/null
+  rm -r "$tmp"; echo docs/images/icon.png
+}
+state() {
+  A shell am stack list | grep -E "taskId=[0-9]+: ($PKG|com\.google\.desktop\.glowbar)/" || echo "no Disco or Glowbar task"
+  A shell dumpsys window | grep -m1 mCurrentFocus | sed 's/^ *//'
+}
+
+case "${1:-}" in
+  build) shift; build "$@" ;;
+  install) shift; A install -r "${1:-$APK}" ;;
+  app) build; A install -r "$APK"; launch ;;
+  launch) launch ;;
+  idle) idle ;;
+  state) state ;;
+  logs) A shell "logcat -d" | grep -E "disco|glowbar|Glowbar" | tail -"${2:-40}" ;;
+  icon) icon ;;
+  *) sed -n '3,13p' "$0"; exit 1 ;;
+esac

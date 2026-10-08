@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- No permissions. Google Play would offer Disco to Googlebooks only: with minSdk 37 the PCs are Googlebooks. -->
+    <uses-feature android:name="android.hardware.type.pc" android:required="true" />
+
+    <application
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name">
+
+        <!-- The icon. It opens Glowbar Disco in Glowbar's own window and leaves nothing behind: no window, no task in
+             Recents or on the taskbar. -->
+        <activity
+            android:name=".DiscoActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.NoDisplay">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
