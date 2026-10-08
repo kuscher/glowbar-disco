@@ -1,0 +1,1 @@
+First release: an icon in your app list that opens Glowbar Disco. No window, no permissions, about 30 KB.

@@ -7,7 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 
-/** Opens Glowbar Disco, Glowbar's hidden party mode, and closes. Disco has no window of its own. */
+/** Opens Glowbar Disco, Glowbar's hidden party mode, and closes. This shortcut has no window of its own. */
 class DiscoActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

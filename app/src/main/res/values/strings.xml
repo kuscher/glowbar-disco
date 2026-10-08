@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Disco</string>
+    <string name="app_name">Glowbar Disco</string>
     <string name="no_glowbar">Glowbar Disco isn\'t on this device. It comes with Googlebooks.</string>
 </resources>

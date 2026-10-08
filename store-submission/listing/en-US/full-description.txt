@@ -1,0 +1,14 @@
+Every Googlebook comes with Glowbar Disco, the party mode for the Glowbar, the light bar on the lid: themes, presets and a music sync. It has no icon of its own, so it is hard to find.
+
+This shortcut puts one in your app list. Click it and Glowbar Disco opens. Click it again and the same window comes back. Pin it to your taskbar to keep the party one click away.
+
+That is all it does:
+• No window, no settings, nothing running in the background
+• No permissions, no internet access, no data collected
+• About 30 KB
+
+For Googlebooks only: other devices don't have Glowbar Disco.
+
+The first time Glowbar Disco opens, it asks for the microphone for its music sync. That question comes from Glowbar Disco itself, not from this shortcut.
+
+Glowbar Disco, the Glowbar and Googlebook are Google's. This shortcut is an independent app by Fika Labs and is not made by, affiliated with or endorsed by Google.

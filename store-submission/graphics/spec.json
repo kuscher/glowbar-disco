@@ -1,0 +1,15 @@
+{
+  "name": "Glowbar Disco Shortcut",
+  "tagline": "One click to the Glowbar's party mode on your Googlebook.",
+  "color": "#17142a",
+  "ink": "#ffffff",
+  "icon": "icon-512.png",
+  "feature": 2,
+  "featureHeight": 400,
+  "shots": [
+    { "src": "scenes/taskbar.png", "caption": "One click opens Glowbar Disco" },
+    { "src": "scenes/applist.png", "caption": "Right in your app list" },
+    { "src": "scenes/glow.png", "caption": "Themes, presets and music sync for your Glowbar" },
+    { "src": "scenes/nothing.png", "caption": "Nothing else: no window, no permissions" }
+  ]
+}

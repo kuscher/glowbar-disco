@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: MIT
-# Disco dev helper: build, install and try the app on a Googlebook over adb.
+# Glowbar Disco (the shortcut) dev helper: build, install and try it on a Googlebook over adb.
 #
 #   ./dc build [release]   assemble the debug (or release) APK
 #   ./dc install [APK]     install it (default: the debug APK)
 #   ./dc app               build, install, then tap the icon (launch)
 #   ./dc launch            what tapping the icon does: open Glowbar Disco
 #   ./dc idle              seconds since someone last used the device, and the focused window
-#   ./dc state             Disco's and Glowbar's tasks, and what is focused
-#   ./dc logs [N]          Disco's and Glowbar's last log lines
-#   ./dc icon              redraw the icon: its drawables, and docs/images/icon.png (needs Chrome)
+#   ./dc state             our and Glowbar's tasks, and what is focused
+#   ./dc logs [N]          our and Glowbar's last log lines
+#   ./dc icon              redraw the icon: its drawables, docs/images/icon.png and Play's 512 px icon (needs Chrome)
 #
 # The device: ANDROID_SERIAL when set; otherwise the one attached device that says it is a PC (a Googlebook).
 set -euo pipefail
@@ -46,10 +46,15 @@ icon() { # the drawables from tools/icon.py; the README's picture is the same SV
   tmp=$(mktemp -d); tools/icon.py --svg "$tmp/icon.svg"
   printf '%s' '<!doctype html><body style="margin:0"><div style="width:448px;height:448px;overflow:hidden;border-radius:50%">' \
     '<img src="icon.svg" style="width:672px;height:672px;margin:-112px"></div>' > "$tmp/icon.html"
-  mkdir -p docs/images
+  mkdir -p docs/images store-submission/graphics
   "$chrome" --headless=new --disable-gpu --hide-scrollbars --default-background-color=00000000 --window-size=448,448 \
     --screenshot="$PWD/docs/images/icon.png" "file://$tmp/icon.html" 2>/dev/null
-  rm -r "$tmp"; echo docs/images/icon.png
+  # Play's icon: the 72 dp a launcher shows, full square (Play rounds the corners), 512 px.
+  printf '%s' '<!doctype html><body style="margin:0"><div style="width:512px;height:512px;overflow:hidden">' \
+    '<img src="icon.svg" style="width:768px;height:768px;margin:-128px"></div>' > "$tmp/play.html"
+  "$chrome" --headless=new --disable-gpu --hide-scrollbars --window-size=512,512 \
+    --screenshot="$PWD/store-submission/graphics/icon-512.png" "file://$tmp/play.html" 2>/dev/null
+  rm -r "$tmp"; echo docs/images/icon.png store-submission/graphics/icon-512.png
 }
 state() {
   A shell am stack list | grep -E "taskId=[0-9]+: ($PKG|com\.google\.desktop\.glowbar)/" || echo "no Disco or Glowbar task"
